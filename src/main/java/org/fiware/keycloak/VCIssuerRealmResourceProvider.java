@@ -425,8 +425,7 @@ public class VCIssuerRealmResourceProvider implements RealmResourceProvider {
 				.credentials(List.of(offeredCredential))
 				.grants(new PreAuthorizedGrantVO().
 						urnColonIetfColonParamsColonOauthColonGrantTypeColonPreAuthorizedCode(
-								new PreAuthorizedVO().preAuthorizedCode(preAuthorizedCode)
-										.userPinRequired(false)));
+								new PreAuthorizedVO().preAuthorizedCode(preAuthorizedCode)));
 
 		LOGGER.infof("Responding with offer: %s", theOffer);
 		return Response.ok()
