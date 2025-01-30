@@ -92,10 +92,8 @@ export class VC extends React.Component<VCProps, VCState> {
   }
 
   private fetchIssuer(): Promise<string> {
-
-    const accountURL = new URL(this.context.accountUrl);
     const keycloakContext = this.context.kcSvc.keycloakAuth;
-    const path = accountURL.protocol + "//" + accountURL.host + "/realms/" + keycloakContext.realm + "/verifiable-credential/issuer"
+    const path = keycloakContext.authServerUrl + "/realms/" + keycloakContext.realm + "/verifiable-credential/issuer"
     var options = {  
       method: 'GET'
       }
@@ -105,9 +103,8 @@ export class VC extends React.Component<VCProps, VCState> {
   }
 
   private fetchAvailableTypes() {
-      const accountURL = new URL(this.context.accountUrl)
       const keycloakContext = this.context.kcSvc.keycloakAuth;
-      const vcTypes = accountURL.protocol + "//" + accountURL.host + "/realms/" + keycloakContext.realm + "/verifiable-credential/" + this.state.issuerDid + "/types";
+      const vcTypes = keycloakContext.authServerUrl + "/realms/" + keycloakContext.realm + "/verifiable-credential/" + this.state.issuerDid + "/types";
       const token = keycloakContext.token
 
       var options = {  
@@ -142,13 +139,10 @@ export class VC extends React.Component<VCProps, VCState> {
 
 
   private requestVCOffer(path: String) {
-
- 
     const supportedCredential: SupportedCredential = this.getSelectedCredential()
 
-    const accountURL = new URL(this.context.accountUrl)
     const keycloakContext = this.context.kcSvc.keycloakAuth;
-    const vcIssue = accountURL.protocol + "//" + accountURL.host + "/realms/" + keycloakContext.realm + "/verifiable-credential/" +  this.state.issuerDid + "/credential-offer-uri?type="+ supportedCredential.type+"&format="+supportedCredential.format;
+    const vcIssue = keycloakContext.authServerUrl + "/realms/" + keycloakContext.realm + "/verifiable-credential/" +  this.state.issuerDid + "/credential-offer-uri?type="+ supportedCredential.type+"&format="+supportedCredential.format;
     const token = keycloakContext.token
 
     var options = {  
@@ -168,7 +162,7 @@ export class VC extends React.Component<VCProps, VCState> {
           console.log("Did not receive an offer.");
           ContentAlert.warning(response.status + ":" + response.statusText);
         } else {
-          const credUrl = offerURI.issuer + "/credential-offer?credential_offer_uri="
+          const credUrl = offerURI.issuer.replace(/https?/g,"openid-credential-offer") + "/credential-offer?credential_offer_uri="
               + encodeURIComponent(offerURI.issuer + "/credential-offer/" + offerURI.nonce)
           console.log(credUrl)
           this.setState({ ...{
