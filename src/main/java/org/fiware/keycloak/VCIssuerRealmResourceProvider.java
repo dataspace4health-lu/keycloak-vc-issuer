@@ -422,7 +422,7 @@ public class VCIssuerRealmResourceProvider implements RealmResourceProvider {
         String preAuthorizedCode = generateAuthorizationCodeForClientSession(result.getClientSession());
 		CredentialsOfferVO theOffer = new CredentialsOfferVO()
 				.credentialIssuer(getIssuer())
-				.credentials(List.of(offeredCredential))
+				.credentials(List.of(offeredCredential.getType() + "_" + offeredCredential.getFormat()))
 				.grants(new PreAuthorizedGrantVO().
 						urnColonIetfColonParamsColonOauthColonGrantTypeColonPreAuthorizedCode(
 								new PreAuthorizedVO().preAuthorizedCode(preAuthorizedCode)));
