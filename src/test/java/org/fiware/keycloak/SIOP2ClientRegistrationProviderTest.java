@@ -55,24 +55,24 @@ public class SIOP2ClientRegistrationProviderTest {
 	private static Stream<Arguments> provideSIOP2Clients() {
 		return Stream.of(
 				Arguments.of(
-						new SIOP2Client("did:test:did", null, null, null, null, null),
+						new SIOP2Client("did:test:did", null, null, null, null, null, null),
 						new ExpectedResult(getClientRepresentation("did:test:did"),
 								"A valid client should have been created.")),
 				Arguments.of(
-						new SIOP2Client("did:test:did", null, "my desc", null, null, null),
+						new SIOP2Client("did:test:did", null, "my desc", null, null, null, null),
 						new ExpectedResult(getClientRepresentation("did:test:did", null, "my desc", null),
 								"A valid client should have been created.")),
 				Arguments.of(
-						new SIOP2Client("did:test:did", null, "my desc", "my name", null, null),
+						new SIOP2Client("did:test:did", null, "my desc", "my name", null, null, null),
 						new ExpectedResult(getClientRepresentation("did:test:did", "my name", "my desc", null),
 								"A valid client should have been created.")),
 				Arguments.of(
-						new SIOP2Client("did:test:did", List.of(new SupportedCredential("PacketDeliveryService", FormatVO.LDP_VC),new SupportedCredential("SomethingFancy", FormatVO.LDP_VC)), null, null, null, null),
+						new SIOP2Client("did:test:did", List.of(new SupportedCredential("PacketDeliveryService", FormatVO.LDP_VC),new SupportedCredential("SomethingFancy", FormatVO.LDP_VC)), null, null, null, null, null),
 						new ExpectedResult(getClientRepresentation("did:test:did", null, null,
 								Map.of("vctypes_PacketDeliveryService", FormatVO.LDP_VC.toString(),
 										"vctypes_SomethingFancy", FormatVO.LDP_VC.toString())),
 								"A valid client should have been created.")),
-				Arguments.of(new SIOP2Client("did:test:did", List.of(new SupportedCredential("PacketDeliveryService", FormatVO.LDP_VC),new SupportedCredential("SomethingFancy", FormatVO.LDP_VC)), null, null, null,
+				Arguments.of(new SIOP2Client("did:test:did", List.of(new SupportedCredential("PacketDeliveryService", FormatVO.LDP_VC),new SupportedCredential("SomethingFancy", FormatVO.LDP_VC)), null, null, null, null,
 								Map.of("additional", "claim", "another", "one")),
 						new ExpectedResult(getClientRepresentation("did:test:did", null, null,
 								Map.of(
@@ -82,7 +82,7 @@ public class SIOP2ClientRegistrationProviderTest {
 										"vctypes_SomethingFancy", FormatVO.LDP_VC.toString())),
 								"A valid client should have been created.")),
 				Arguments.of(new SIOP2Client("did:test:did", List.of(new SupportedCredential("PacketDeliveryService", FormatVO.LDP_VC),new SupportedCredential("SomethingFancy", FormatVO.LDP_VC)), null, null,
-								1000l,
+								1000l, null,
 								Map.of("additional", "claim", "another", "one")),
 						new ExpectedResult(getClientRepresentation("did:test:did", null, null,
 								Map.of(

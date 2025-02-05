@@ -38,6 +38,10 @@ public class SIOP2Client {
 	 */
 	private Long expiryInMin;
 	/**
+	 * A map of claims that will be provided within the generated VC.
+	 */
+	private Map<String, String> claims;
+	/**
 	 * A map of additional claims that will be provided within the generated VC.
 	 */
 	private Map<String, String> additionalClaims;

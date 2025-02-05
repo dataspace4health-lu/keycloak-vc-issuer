@@ -109,10 +109,13 @@ public class SIOP2ClientRegistrationProvider extends AbstractClientRegistrationP
 		Optional.ofNullable(siop2Client.getDescription()).ifPresent(clientRepresentation::setDescription);
 		Optional.ofNullable(siop2Client.getName()).ifPresent(clientRepresentation::setName);
 
-		// add potential additional claims
-		Map<String, String> clientAttributes = new HashMap<>(
-				prefixClaims(VC_CLAIMS_PREFIX, siop2Client.getAdditionalClaims()));
+		// add potential claims
+		Map<String, String> clientAttributes = new HashMap<>();
+		clientAttributes.putAll(siop2Client.getClaims() != null ? siop2Client.getClaims() : Map.of());
 
+		// add potential additional claims
+		clientAttributes.putAll(prefixClaims(VC_CLAIMS_PREFIX, siop2Client.getAdditionalClaims()));
+		
 		// only set expiry if present
 		Optional.ofNullable(siop2Client.getExpiryInMin())
 				.ifPresent(expiry -> clientAttributes.put(EXPIRY_IN_MIN, String.format("%s", expiry)));
