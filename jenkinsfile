@@ -11,13 +11,13 @@ pipeline {
     parameters {
         string(name: "registery", description: "Azure Container Registery Name", defaultValue: "dh4sdev")
         string(name: "registery_domain", description: "Azure Container Registery domaine name", defaultValue: "dh4sdev.azurecr.io")
-        string(name: "image" ,description: "Federated cataog contaner image ame", defaultValue: "fc-protal")
+        string(name: "image" ,description: "Federated cataog container image name", defaultValue: "keycloak-vc-issuer")
     }
     agent {label 'worker'}
     stages {
         stage("Clonning Repo") {
             steps {
-                git credentialsId: 'azure-devops', branch: 'jenkins', url: 'git@ssh.dev.azure.com:v3/Dataspace4Health/DS4H/fc-portal'
+                git credentialsId: 'azure-devops', branch: 'jenkins', url: 'https://Dataspace4Health@dev.azure.com/Dataspace4Health/DS4H/_git/keycloak-vc-issuer'
                 withCredentials([sshUserPrivateKey(credentialsId: 'azure-devops', keyFileVariable: 'SSH_KEY')]) {
                     sh 'cp "$SSH_KEY" key'
                     sh "chmod 400 key"
