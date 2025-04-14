@@ -1,0 +1,126 @@
+#!groovy 
+pipeline {
+    environment {
+        APP_ID = getCredential('app_id')
+        TENANT_ID = getCredential('tenant_id')
+        SP_PASSWORD = getCredential('sp_password')
+        SUB_ID = getCredential('sub_id')
+        GIT_SSH_COMMAND = 'ssh -i key'
+        PIPELINE = 'fc-portal'
+    }
+    parameters {
+        string(name: "registery", description: "Azure Container Registery Name", defaultValue: "dh4sdev")
+        string(name: "registery_domain", description: "Azure Container Registery domaine name", defaultValue: "dh4sdev.azurecr.io")
+        string(name: "image" ,description: "Federated cataog contaner image ame", defaultValue: "fc-protal")
+    }
+    agent {label 'worker'}
+    stages {
+        stage("Clonning Repo") {
+            steps {
+                git credentialsId: 'azure-devops', branch: 'jenkins', url: 'git@ssh.dev.azure.com:v3/Dataspace4Health/DS4H/fc-portal'
+                withCredentials([sshUserPrivateKey(credentialsId: 'azure-devops', keyFileVariable: 'SSH_KEY')]) {
+                    sh 'cp "$SSH_KEY" key'
+                    sh "chmod 400 key"
+                }
+            }
+        }
+        stage("Build Container Image") {
+            steps {
+                script {
+                    // Container image build
+                    def random = UUID.randomUUID().toString()
+                    def randomImageName = "jenkins-generated-image-${env.PIPELINE}:${random}"
+                    env.randomImageName = randomImageName
+                    sh "docker build -t ${randomImageName} ."
+                    def versions = versions("info.txt")
+                    def release = versions.release == null ? "" : "-${versions.release}"
+                    def version = "${versions.major}.${versions.minor}.${versions.patch}${release}"
+                    def latest_tag = get_latest_tag()
+                    if (latest_tag == version) {
+                        env.exit = "true"
+                        echo "No version change detected. Pipeline Exit"
+                    }
+                }
+            }
+        }
+
+        stage ("Azure Login"){
+            when {
+                expression {
+                    return env.exit != "true"
+                }
+            }
+            steps {
+                sh 'az login --service-principal --username \$APP_ID --password \$SP_PASSWORD --tenant \$TENANT_ID'
+                sh "az account set --subscription \$SUB_ID"
+            }
+        }
+
+        stage("Version Remote Repository And Publish Container Image") {
+            when {
+                expression {
+                    return env.exit != "true"
+                }
+            }
+            steps {
+                script {
+                    def latestCommit = sh(script: "git rev-parse HEAD", returnStdout: true).trim()
+                    def versions = versions("info.txt")
+                    def release = versions.release == null ? "" : "-${versions.release}"
+                    def version = "${versions.major}.${versions.minor}.${versions.patch}${release}"
+                    def randomImageName = env.randomImageName
+                    sh "git tag ${version} ${latestCommit}"
+                    sh "git push origin ${version}"
+                    // Container Image Publication
+                    sh "az acr login --name ${params.registery}"
+                    sh "docker tag ${randomImageName} ${params.registery_domain}/${params.image}:${version}"
+                    sh "docker push ${params.registery_domain}/${params.image}:${version}"
+                }
+            }
+        }
+    }
+    post {
+        always {
+            script {
+                cleanWs()
+            }
+        }
+    }
+}
+
+def versions(path){
+    def fileContent = readFile path
+    def versionMap = [:]
+    fileContent.split('\n').each { line ->
+        def (key, value) = line.split('=')
+        versionMap[key.trim()] = value.trim()
+    }
+    return versionMap
+}
+
+def get_latest_tag() {
+    sh "git fetch --tags"
+    def latest_tag = sh(script: "git for-each-ref --sort=-creatordate --format '%(refname:strip=2)' refs/tags | head -n 1", returnStdout: true).trim()
+    if(latest_tag) {
+        return latest_tag
+    } else {
+       return null
+    }
+}
+
+def getCredential(id) {
+    def credential = 'None'
+    try {
+        withCredentials([string(credentialsId: id, variable: 'TEMP_CREDENTIAL')]) {
+            if (TEMP_CREDENTIAL) {
+                credential = TEMP_CREDENTIAL
+                echo "Credential ${id} is set."
+            } else {
+                echo "Credential ${id} is not set, falling back to empty string."
+            }
+        }
+    } catch (Exception e) {
+        echo "Credential ${id} not found or an error occurred, falling back to empty string."
+    }
+    return credential
+}
