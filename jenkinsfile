@@ -1,10 +1,6 @@
 #!groovy 
 pipeline {
     environment {
-        APP_ID = getCredential('app_id')
-        TENANT_ID = getCredential('tenant_id')
-        SP_PASSWORD = getCredential('sp_password')
-        SUB_ID = getCredential('sub_id')
         GIT_SSH_COMMAND = 'ssh -i key'
         PIPELINE = 'fc-portal'
     }
@@ -17,9 +13,9 @@ pipeline {
     stages {
         stage("Clonning Repo") {
             steps {
-                git credentialsId: 'azure-devops', branch: 'jenkins', url: 'https://Dataspace4Health@dev.azure.com/Dataspace4Health/DS4H/_git/keycloak-vc-issuer'
+                git credentialsId: 'azure-devops', branch: 'jenkins', url: 'git@ssh.dev.azure.com:v3/Dataspace4Health/DS4H/keycloak-vc-issuer'
                 withCredentials([sshUserPrivateKey(credentialsId: 'azure-devops', keyFileVariable: 'SSH_KEY')]) {
-                    sh 'cp "$SSH_KEY" key'
+                    sh "cp ${SSH_KEY} key"
                     sh "chmod 400 key"
                 }
             }
@@ -51,8 +47,16 @@ pipeline {
                 }
             }
             steps {
-                sh 'az login --service-principal --username \$APP_ID --password \$SP_PASSWORD --tenant \$TENANT_ID'
-                sh "az account set --subscription \$SUB_ID"
+                withCredentials([
+                    string(credentialsId: 'app_id', variable: 'APP_ID'),
+                    string(credentialsId: 'sub_id', variable: 'SUB_ID'), 
+                    string(credentialsId: 'tenant_id', variable: 'TENANT_ID'), 
+                    string(credentialsId: 'sp_password', variable: 'SP_PASSWORD'),
+                ]) {
+                    sh "az login --service-principal --username ${APP_ID} --password ${SP_PASSWORD} --tenant ${TENANT_ID}"
+                    sh "az account set --subscription ${SUB_ID}"
+                    sh "az acr login --name ${params.registery}"
+                }
             }
         }
 
@@ -69,12 +73,14 @@ pipeline {
                     def release = versions.release == null ? "" : "-${versions.release}"
                     def version = "${versions.major}.${versions.minor}.${versions.patch}${release}"
                     def randomImageName = env.randomImageName
+                    // Tag the remote repo
                     sh "git tag ${version} ${latestCommit}"
                     sh "git push origin ${version}"
                     // Container Image Publication
-                    sh "az acr login --name ${params.registery}"
                     sh "docker tag ${randomImageName} ${params.registery_domain}/${params.image}:${version}"
+                    sh "docker tag ${randomImageName} ${params.registery_domain}/${params.image}:latest"
                     sh "docker push ${params.registery_domain}/${params.image}:${version}"
+                    sh "docker push ${params.registery_domain}/${params.image}:latest"
                 }
             }
         }
