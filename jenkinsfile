@@ -29,6 +29,7 @@ pipeline {
                     def pipeline = env.JOB_NAME.replaceAll(' ', '-').toLowerCase()
                     def randomImageName = "jenkins-generated-image-${pipeline}:${random}"
                     env.randomImageName = randomImageName
+                    sh "mvn clean package"
                     sh "docker build -t ${randomImageName} -f deploy/Dockerfile-init ."
                     def versions = versions("info.txt")
                     def release = versions.release == null ? "" : "-${versions.release}"
