@@ -2,7 +2,7 @@
 pipeline {
     environment {
         GIT_SSH_COMMAND = 'ssh -i key'
-        PIPELINE = 'fc-portal'
+        AZURE_CONFIG_DIR = "${env.WORKSPACE}/tmp/azure"
     }
     parameters {
         string(name: "registery", description: "Azure Container Registery Name", defaultValue: "dh4sdev")
@@ -15,9 +15,10 @@ pipeline {
             steps {
                 git credentialsId: 'azure-devops', branch: 'jenkins', url: 'git@ssh.dev.azure.com:v3/Dataspace4Health/DS4H/keycloak-vc-issuer'
                 withCredentials([sshUserPrivateKey(credentialsId: 'azure-devops', keyFileVariable: 'SSH_KEY')]) {
-                    sh "cp ${SSH_KEY} key"
-                    sh "chmod 400 key"
+                    sh('cp "$SSH_KEY" key')
+                    sh('chmod 400 key')
                 }
+                sh('mkdir -p $AZURE_CONFIG_DIR')
             }
         }
         stage("Build Container Image") {
@@ -25,7 +26,8 @@ pipeline {
                 script {
                     // Container image build
                     def random = UUID.randomUUID().toString()
-                    def randomImageName = "jenkins-generated-image-${env.PIPELINE}:${random}"
+                    def pipeline = env.JOB_NAME.replaceAll(' ', '-').toLowerCase()
+                    def randomImageName = "jenkins-generated-image-${pipeline}:${random}"
                     env.randomImageName = randomImageName
                     sh "docker build -t ${randomImageName} ."
                     def versions = versions("info.txt")
@@ -53,9 +55,9 @@ pipeline {
                     string(credentialsId: 'tenant_id', variable: 'TENANT_ID'), 
                     string(credentialsId: 'sp_password', variable: 'SP_PASSWORD'),
                 ]) {
-                    sh "az login --service-principal --username ${APP_ID} --password ${SP_PASSWORD} --tenant ${TENANT_ID}"
-                    sh "az account set --subscription ${SUB_ID}"
-                    sh "az acr login --name ${params.registery}"
+                    sh('az login --service-principal --username $APP_ID --password $SP_PASSWORD --tenant $TENANT_ID')
+                    sh('az account set --subscription $SUB_ID')
+                    sh("az acr login --name ${params.registery}")
                 }
             }
         }
@@ -81,6 +83,7 @@ pipeline {
                     sh "docker tag ${randomImageName} ${params.registery_domain}/${params.image}:latest"
                     sh "docker push ${params.registery_domain}/${params.image}:${version}"
                     sh "docker push ${params.registery_domain}/${params.image}:latest"
+                    sh('az logout')
                 }
             }
         }
