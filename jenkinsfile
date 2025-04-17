@@ -81,8 +81,8 @@ pipeline {
                     sh "git push origin ${version}"
                     // Container Image Publication
                     sh "docker tag ${randomImageName} ${params.registery_domain}/${params.image}:${version}"
-                    sh "docker tag ${randomImageName} ${params.registery_domain}/${params.image}:latest"
                     sh "docker push ${params.registery_domain}/${params.image}:${version}"
+                    sh "docker tag ${params.registery_domain}/${params.image}:${version} ${params.registery_domain}/${params.image}:latest"
                     sh "docker push ${params.registery_domain}/${params.image}:latest"
                     sh('az logout')
                 }
