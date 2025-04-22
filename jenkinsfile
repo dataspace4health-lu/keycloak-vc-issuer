@@ -2,7 +2,7 @@
 pipeline {
     environment {
         GIT_SSH_COMMAND = 'ssh -i key'
-        AZURE_CONFIG_DIR = "${env.WORKSPACE}/tmp/azure"
+        GIT_REPO = 'git@ssh.dev.azure.com:v3/Dataspace4Health/DS4H/keycloak-vc-issuer'
     }
     parameters {
         string(name: "registery", description: "Azure Container Registery Name", defaultValue: "dh4sdev")
@@ -13,14 +13,14 @@ pipeline {
     stages {
         stage("Clonning Repo") {
             steps {
-                git credentialsId: 'azure-devops', branch: 'jenkins', url: 'git@ssh.dev.azure.com:v3/Dataspace4Health/DS4H/keycloak-vc-issuer'
+                git credentialsId: 'azure-devops', branch: 'jenkins', url: GIT_REPO
                 withCredentials([sshUserPrivateKey(credentialsId: 'azure-devops', keyFileVariable: 'SSH_KEY')]) {
                     sh('cp "$SSH_KEY" key')
                     sh('chmod 400 key')
                 }
-                sh('mkdir -p $AZURE_CONFIG_DIR')
             }
         }
+
         stage("Build Container Image") {
             steps {
                 script {
@@ -29,62 +29,16 @@ pipeline {
                     def pipeline = env.JOB_NAME.replaceAll(' ', '-').toLowerCase()
                     def randomImageName = "jenkins-generated-image-${pipeline}:${random}"
                     env.randomImageName = randomImageName
-                    sh "mvn clean package"
+                    // sh "mvn clean package"
                     sh "docker build -t ${randomImageName} -f deploy/Dockerfile-init ."
-                    def versions = versions("info.txt")
-                    def release = versions.release == null ? "" : "-${versions.release}"
-                    def version = "${versions.major}.${versions.minor}.${versions.patch}${release}"
-                    def latest_tag = get_latest_tag()
-                    if (latest_tag == version) {
-                        env.exit = "true"
-                        echo "No version change detected. Pipeline Exit"
-                    }
                 }
             }
         }
 
-        stage ("Azure Login"){
-            when {
-                expression {
-                    return env.exit != "true"
-                }
-            }
-            steps {
-                withCredentials([
-                    string(credentialsId: 'app_id', variable: 'APP_ID'),
-                    string(credentialsId: 'sub_id', variable: 'SUB_ID'), 
-                    string(credentialsId: 'tenant_id', variable: 'TENANT_ID'), 
-                    string(credentialsId: 'sp_password', variable: 'SP_PASSWORD'),
-                ]) {
-                    sh('az login --service-principal --username $APP_ID --password $SP_PASSWORD --tenant $TENANT_ID')
-                    sh('az account set --subscription $SUB_ID')
-                    sh("az acr login --name ${params.registery}")
-                }
-            }
-        }
-
-        stage("Version Remote Repository And Publish Container Image") {
-            when {
-                expression {
-                    return env.exit != "true"
-                }
-            }
+        stage("Clean Up") {
             steps {
                 script {
-                    def latestCommit = sh(script: "git rev-parse HEAD", returnStdout: true).trim()
-                    def versions = versions("info.txt")
-                    def release = versions.release == null ? "" : "-${versions.release}"
-                    def version = "${versions.major}.${versions.minor}.${versions.patch}${release}"
-                    def randomImageName = env.randomImageName
-                    // Tag the remote repo
-                    sh "git tag ${version} ${latestCommit}"
-                    sh "git push origin ${version}"
-                    // Container Image Publication
-                    sh "docker tag ${randomImageName} ${params.registery_domain}/${params.image}:${version}"
-                    sh "docker push ${params.registery_domain}/${params.image}:${version}"
-                    sh "docker tag ${params.registery_domain}/${params.image}:${version} ${params.registery_domain}/${params.image}:latest"
-                    sh "docker push ${params.registery_domain}/${params.image}:latest"
-                    sh('az logout')
+                    sh "docker rmi ${env.randomImageName}"
                 }
             }
         }
@@ -95,26 +49,6 @@ pipeline {
                 cleanWs()
             }
         }
-    }
-}
-
-def versions(path){
-    def fileContent = readFile path
-    def versionMap = [:]
-    fileContent.split('\n').each { line ->
-        def (key, value) = line.split('=')
-        versionMap[key.trim()] = value.trim()
-    }
-    return versionMap
-}
-
-def get_latest_tag() {
-    sh "git fetch --tags"
-    def latest_tag = sh(script: "git for-each-ref --sort=-creatordate --format '%(refname:strip=2)' refs/tags | head -n 1", returnStdout: true).trim()
-    if(latest_tag) {
-        return latest_tag
-    } else {
-       return null
     }
 }
 
