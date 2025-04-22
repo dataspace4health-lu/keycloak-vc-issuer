@@ -7,7 +7,7 @@ pipeline {
     parameters {
         string(name: "registery", description: "Azure Container Registery Name", defaultValue: "dh4sdev")
         string(name: "registery_domain", description: "Azure Container Registery domaine name", defaultValue: "dh4sdev.azurecr.io")
-        string(name: "image" ,description: "Federated cataog container image name", defaultValue: "keycloak-vc-issuer")
+        string(name: "image" ,description: "Keycloak vc issuer image name", defaultValue: "keycloak-vc-issuer")
     }
     agent {label 'worker'}
     stages {
