@@ -12,6 +12,7 @@ public class VCConfig {
 	private String issuerDid;
 	private String subjectDid;
 	private String proofType;
+	private String ldSignatureType;
 	private String expirationDate;
 
 }

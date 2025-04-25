@@ -773,7 +773,8 @@ public class VCIssuerRealmResourceProvider implements RealmResourceProvider {
 		claimsBuilder.additionalClaims(additionalClaims);
 		VCClaims vcClaims = claimsBuilder.build();
 		vcConfigBuilder.issuerDid(issuerDid)
-				.proofType(proofType.toString());
+				.proofType(proofType.toString())
+				.ldSignatureType("Ed25519Signature2020");
 
 		// TODO: reintroduce when walt api is fixed
 		//		optionalMinExpiry
@@ -870,7 +871,7 @@ public class VCIssuerRealmResourceProvider implements RealmResourceProvider {
 							.format(formatVO)
 							.types(List.of(type))
 							.cryptographicBindingMethodsSupported(List.of("did"))
-							.cryptographicSuitesSupported(List.of("Ed25519Signature2018"));
+							.cryptographicSuitesSupported(List.of("Ed25519Signature2020"));
 				}
 		).collect(Collectors.toList());
 	}
