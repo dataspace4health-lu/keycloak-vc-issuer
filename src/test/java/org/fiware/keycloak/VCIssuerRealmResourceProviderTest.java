@@ -488,7 +488,7 @@ public class VCIssuerRealmResourceProviderTest {
 				.config(VCConfig.builder()
 						.issuerDid(ISSUER_DID)
 						.proofType(LD_PROOF_TYPE)
-						.ldSignatureType("Ed25519Signature2020")
+						.ldSignatureType("JsonWebSignature2020")
 						.build())
 				.credentialData(VCData.builder()
 						.credentialSubject(
