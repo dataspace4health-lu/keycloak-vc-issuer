@@ -774,7 +774,7 @@ public class VCIssuerRealmResourceProvider implements RealmResourceProvider {
 		VCClaims vcClaims = claimsBuilder.build();
 		vcConfigBuilder.issuerDid(issuerDid)
 				.proofType(proofType.toString())
-				.ldSignatureType("Ed25519Signature2020");
+				.ldSignatureType("JsonWebSignature2020");
 
 		// TODO: reintroduce when walt api is fixed
 		//		optionalMinExpiry
@@ -871,7 +871,7 @@ public class VCIssuerRealmResourceProvider implements RealmResourceProvider {
 							.format(formatVO)
 							.types(List.of(type))
 							.cryptographicBindingMethodsSupported(List.of("did"))
-							.cryptographicSuitesSupported(List.of("Ed25519Signature2020"));
+							.cryptographicSuitesSupported(List.of("JsonWebSignature2020"));
 				}
 		).collect(Collectors.toList());
 	}
