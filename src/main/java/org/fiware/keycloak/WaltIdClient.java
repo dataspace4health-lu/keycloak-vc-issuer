@@ -11,11 +11,13 @@ import org.fiware.keycloak.model.VCRequest;
 import org.jboss.logging.Logger;
 import org.keycloak.services.ErrorResponseException;
 
-import javax.validation.constraints.NotNull;
-import javax.ws.rs.BadRequestException;
-import javax.ws.rs.InternalServerErrorException;
-import javax.ws.rs.ServerErrorException;
-import javax.ws.rs.core.Response;
+import jakarta.validation.constraints.NotNull;
+import jakarta.ws.rs.BadRequestException;
+import jakarta.ws.rs.InternalServerErrorException;
+import jakarta.ws.rs.ServerErrorException;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.HttpHeaders;
+
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
