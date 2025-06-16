@@ -73,7 +73,7 @@
         <!-- version to be used for tests - can be different from the libs -->
         <keycloak.version>23.0.7</keycloak.version>
         <keycloak.image>quay.io/keycloak/keycloak:${keycloak.version}</keycloak.image>
-        <version.io.quarkus>3.2.0.Final</version.io.quarkus>
+        <version.io.quarkus>3.2.10.Final</version.io.quarkus>
 
         <version.org.eclipse.jkube.kubernetes-maven-plugin>1.10.1</version.org.eclipse.jkube.kubernetes-maven-plugin>
         <version.org.keycloak.keycloak-admin-client>${keycloak.version}</version.org.keycloak.keycloak-admin-client>
