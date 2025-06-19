@@ -4,7 +4,7 @@ ARG PLUGIN_VERSION=1.0.3
 ARG JAR_DIR=target/
 
 # we also need to add 3rd party dependencies
-# ADD ${JAR_DIR}lib/ /provider/
+ADD ${JAR_DIR}lib/ /provider/
 # typical context is the build-dir
 ADD ${JAR_DIR}vc-issuer-${PLUGIN_VERSION}.jar /provider/vc-issuer-${PLUGIN_VERSION}.jar
 
