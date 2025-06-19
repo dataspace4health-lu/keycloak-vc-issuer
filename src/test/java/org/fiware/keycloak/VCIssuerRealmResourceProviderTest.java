@@ -34,8 +34,9 @@ import org.keycloak.services.managers.AppAuthManager;
 import org.keycloak.services.managers.AuthenticationManager;
 import org.mockito.ArgumentCaptor;
 
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response;
+
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
