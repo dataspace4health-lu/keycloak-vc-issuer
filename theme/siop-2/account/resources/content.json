@@ -14,7 +14,7 @@
     "icon": "pf-icon-key",
     "label": "Verifiable Credentials",
     "descriptionLabel": "Generate Verifiable Credentials for your account.",
-    "modulePath": "/content/vc/VC.js",
+    "modulePath": "/content/vc-page/VC.js",
     "componentName": "VC"
   },
   {

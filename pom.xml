@@ -57,8 +57,9 @@
         <project.contact.email>stefan.wiedemann@fiware.org</project.contact.email>
 
         <!-- frontend build -->
-        <version.com.github.eirslett.frontend-maven-plugin>1.12.1</version.com.github.eirslett.frontend-maven-plugin>
+        <version.com.github.eirslett.frontend-maven-plugin>1.15.1</version.com.github.eirslett.frontend-maven-plugin>
         <version.frontend.node>v18.9.0</version.frontend.node>
+        <version.frontend.pnpm>8.15.9</version.frontend.pnpm>
         <version.org.apache.maven.plugins.maven-clean-plugin>3.2.0</version.org.apache.maven.plugins.maven-clean-plugin>
 
         <!-- lazy dev -->
@@ -477,24 +478,23 @@
                     <execution>
                         <phase>generate-sources</phase>
                         <goals>
-                            <goal>install-node-and-npm</goal>
+                            <goal>install-node-and-pnpm</goal>
                         </goals>
                     </execution>
                     <execution>
-                        <id>npm install</id>
-                        <phase>generate-sources</phase>
+                        <id>pnpm install</id>
                         <goals>
-                            <goal>npm</goal>
+                            <goal>pnpm</goal>
                         </goals>
                         <configuration>
                             <arguments>install</arguments>
                         </configuration>
                     </execution>
                     <execution>
-                        <id>npm run build</id>
+                        <id>pnpm run build</id>
                         <phase>generate-resources</phase>
                         <goals>
-                            <goal>npm</goal>
+                            <goal>pnpm</goal>
                         </goals>
                         <configuration>
                             <arguments>run build</arguments>
@@ -503,6 +503,7 @@
                 </executions>
                 <configuration>
                     <nodeVersion>${version.frontend.node}</nodeVersion>
+                    <pnpmVersion>${version.frontend.pnpm}</pnpmVersion>
                     <workingDirectory>${project.build.directory}/theme/siop-2/account/src</workingDirectory>
                     <installDirectory>${project.build.directory}/theme/siop-2/account/src</installDirectory>
                 </configuration>
