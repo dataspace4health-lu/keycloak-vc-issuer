@@ -11,8 +11,8 @@ properties([
 dockerImagePipeline(
     NODE_NAME: params.NODE_NAME,
     BRANCH: params.BRANCH,
-    CUSTOM_BUILD_SCRIPT: './build.sh --ssh',
-    DOCKERFILE_PATH: './deploy/Dockerfile-init',
+    CUSTOM_BUILD_SCRIPT: '',
+    DOCKERFILE_PATH: './deploy/Dockerfile-init-test',
     CUSTOM_LINT_SCRIPT: '', // 'npx eslint --ext ".js,.jsx,.ts,.tsx" -f checkstyle "app" "services"'
     PUBLISH_IMAGE: params.PUBLISH_IMAGE
 )

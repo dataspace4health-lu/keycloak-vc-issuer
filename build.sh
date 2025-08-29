@@ -27,6 +27,10 @@ case "$1" in
     # export GIT_SSH_COMMAND="ssh -i $GIT_TOKEN -o StrictHostKeyChecking=accept-new"
     GIT_CON="--ssh"
     GIT_HOST="git@ssh.dev.azure.com:v3/Dataspace4Health/DS4H"
+    
+    mkdir -p /root/.ssh
+    ssh-keyscan ssh.dev.azure.com >> /root/.ssh/known_hosts
+    chmod 644 /root/.ssh/known_hosts
     ;;
   --help)
     echo "Usage: $0 [--http|--ssh]"

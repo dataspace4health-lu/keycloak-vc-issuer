@@ -1,0 +1,37 @@
+FROM docker.io/gradle:7.5-jdk AS build-env
+
+ARG GIT_TOKEN
+
+WORKDIR /appbuild
+
+RUN export PATH=$PATH:/appbuild/target/theme/siop-2/account/src/node/ \
+    && apt-get update \
+    && apt-get install --yes maven
+
+COPY ./build.sh .
+COPY ./pom.xml .
+COPY ./api ./api
+COPY ./theme ./theme
+COPY ./src ./src
+
+# cache Gradle dependencies
+VOLUME /home/gradle/.gradle
+
+RUN --mount=type=ssh \
+    chmod +x build.sh && \
+    if [ -z "${GIT_TOKEN}" ]; then \
+        ./build.sh --ssh; \
+    else \
+        ./build.sh --http ${GIT_TOKEN}; \
+    fi
+
+FROM busybox:1.36.0
+
+RUN mkdir /provider
+
+COPY --from=build-env /appbuild/target/lib/ /provider/
+COPY --from=build-env /appbuild/target/vc-issuer-*.jar /provider/
+
+VOLUME /target
+
+CMD ["cp", "-a",  "/provider/.", "/target/"]
